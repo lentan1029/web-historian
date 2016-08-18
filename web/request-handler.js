@@ -1,5 +1,6 @@
 var path = require('path');
 var archive = require('../helpers/archive-helpers');
+var helpers = require('./http-helpers');
 var fs = require('fs');
 // require more modules/folders here!
 
@@ -24,14 +25,32 @@ exports.handleRequest = function (req, res) {
       });
     }
   } else if (req.method === 'POST') {
-    var data = '';
+    var inputURL = '';
     req.on('data', function(chunk) {
-      data += chunk;
+      inputURL += chunk;
     }).on('end', function() {
-      fs.appendFile(archive.paths.list, data.slice(4) + '\n', function(err, data) {
-        res.writeHead(302);
-        res.end('posted');
+      archive.isUrlArchived(inputURL.slice(4), function(exists, url) {
+        if (exists) {
+          fs.readFile(archive.paths.archivedSites + '/' + url, function(err, data) {
+            res.writeHead(302, helpers.headers);
+            res.end(data);
+          });
+        } else {
+          fs.readFile(archive.paths.siteAssets + '/loading.html', function(err, data) {
+            res.writeHead(302, helpers.headers);
+            res.end(data);
+          });
+          
+          archive.isUrlInList(inputURL.slice(4), function(exists) {
+            if (!exists) {
+              archive.addUrlToList(inputURL.slice(4), function() {
+                console.log('URL was added to the list.');
+              });
+            }
+          });
+        }
       });
+
     });
   }
 };
