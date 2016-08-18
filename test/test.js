@@ -145,6 +145,7 @@ describe('archive helpers', function() {
   describe('#downloadUrls', function () {
     it('should download all pending urls in the list', function (done) {
       var urlArray = ['www.example.com', 'www.google.com'];
+      console.log('files are', fs.readdirSync(archive.paths.archivedSites));
       archive.downloadUrls(urlArray);
 
       // Ugly hack to wait for all downloads to finish.
