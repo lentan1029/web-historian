@@ -42,7 +42,7 @@ exports.handleRequest = function (req, res) {
           });
           
           archive.isUrlInList(inputURL.slice(4), function(exists) {
-            if (!exists) {
+            if (!exists && inputUrl.length < 40) { //TODO: have a *real* URL validator
               archive.addUrlToList(inputURL.slice(4), function() {
                 console.log('URL was added to the list.');
               });

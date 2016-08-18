@@ -63,7 +63,8 @@ exports.downloadUrls = function(urlArray) {
   for (var i = 0; i < urlArray.length; i++) {
     this.isUrlArchived(urlArray[i], function(exists, url) {
       if (!exists) {
-        fs.writeFile(this.paths.archivedSites + '/' + url, url);
+        fs.writeFile(this.paths.archivedSites + '/' + url, '');
+        // console.log(url);
         request.get('http://' + url).pipe(fs.createWriteStream(this.paths.archivedSites + '/' + url));
       }
     }.bind(this));
