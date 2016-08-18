@@ -1,0 +1,10 @@
+How to set up cronjob for this repo:
+
+type crontab -e
+
+enter the following text in the editor:
+* * * * * /usr/local/bin/node /Users/student/Desktop/2016-07-web-historian/workers/htmlfetcher.js
+
+close it
+
+done :)

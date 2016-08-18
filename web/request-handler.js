@@ -31,19 +31,21 @@ exports.handleRequest = function (req, res) {
     }).on('end', function() {
       archive.isUrlArchived(inputURL.slice(4), function(exists, url) {
         if (exists) {
+          console.log('file exists');
           fs.readFile(archive.paths.archivedSites + '/' + url, function(err, data) {
             res.writeHead(302, helpers.headers);
             res.end(data);
           });
         } else {
+          console.log('file does not exist');
           fs.readFile(archive.paths.siteAssets + '/loading.html', function(err, data) {
             res.writeHead(302, helpers.headers);
             res.end(data);
           });
           
-          archive.isUrlInList(inputURL.slice(4), function(exists) {
-            if (!exists && inputUrl.length < 40) { //TODO: have a *real* URL validator
-              archive.addUrlToList(inputURL.slice(4), function() {
+          archive.isUrlInList(inputURL.slice(4), function(exists, url) {
+            if (!exists && url.length < 40) { //TODO: have a *real* URL validator
+              archive.addUrlToList(url, function() {
                 console.log('URL was added to the list.');
               });
             }

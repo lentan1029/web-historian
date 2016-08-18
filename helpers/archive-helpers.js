@@ -38,7 +38,7 @@ exports.readListOfUrls = function(cb) {
 
 exports.isUrlInList = function(url, cb) {
   this.readListOfUrls( function(array) {
-    cb(array.indexOf(url) !== -1);
+    cb(array.indexOf(url) !== -1, url);
   });
 };
 
