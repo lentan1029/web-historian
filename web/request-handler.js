@@ -42,17 +42,18 @@ exports.handleRequest = function (req, res) {
             res.writeHead(302, helpers.headers);
             res.end(data);
           });
-          
-          archive.isUrlInList(inputURL.slice(4), function(exists, url) {
-            if (!exists && url.length < 40) { //TODO: have a *real* URL validator
-              archive.addUrlToList(url, function() {
-                console.log('URL was added to the list.');
-              });
-            }
-          });
+          // console.log('inputurl', inputUrl);
+          archive.isUrlInList(inputURL.slice(4))
+            .then(function(exists, url) {
+              console.log('in','url', url,'exists', exists);
+              if (!exists && url.length < 40) { //TODO: have a *real* URL validator
+                archive.addUrlToList(url, function() {
+                  console.log('URL was added to the list.');
+                });
+              }
+            });
         }
       });
-
     });
   }
 };

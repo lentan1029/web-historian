@@ -1,7 +1,9 @@
 var fs = require('fs');
 var path = require('path');
 var _ = require('underscore');
+var Promise = require('bluebird');
 var request = require('request');
+var fsAsync = Promise.promisifyAll(fs);
 
 /*
  * You will need to reuse the same paths many times over in the course of this sprint.
@@ -26,28 +28,86 @@ exports.initialize = function(pathsObj) {
 // The following function names are provided to you to suggest how you might
 // modularize your code. Keep it clean!
 
-exports.readListOfUrls = function(cb) {
-  //      1) should read urls from sites.txt
-  fs.readFile(this.paths.list, function(err, data) {
-    var fileString = '';
-    fileString += data;
-    var sitesArray = fileString.split('\n');
-    cb(sitesArray);
-  });
-};
+//TODO:
+// exports.readListOfUrls = function() {
+//   //      1) should read urls from sites.txt
+//   return new Promise(function(resolve, reject) {
+//     fsAsync.readFileAsync(this.paths.list)
+//     .then(function(data) {
+//       var fileString = '';
+//       fileString += data;
+//       var sitesArray = fileString.split('\n');
+//       resolve(sitesArray);
+//     }).catch(function(err) {
+//       reject(err);
+//     });
+//   });
+// };
 
-exports.isUrlInList = function(url, cb) {
-  this.readListOfUrls( function(array) {
-    cb(array.indexOf(url) !== -1, url);
-  });
-};
+// exports.readListOfUrls = function(cb) {
+//   var context = this;
+//   return new Promise(function(resolve, reject) {
+//     fsAsync.readFileAsync(context.paths.list)
+//       .then(function(data) {
+//         var fileString = '';
+//         fileString += data;
+//         resolve(sitesArray = fileString.split('\n'));
+//       }).then(function(array) {
+//         console.log('in resolve',resolve, array, cb);
+//         cb(array);
+//         resolve(array);
+//       }).catch(function(err) {
+//         console.log('in catch');
+//         reject(err);
+//       });
+      // .catch(function(err) {
+      //   console.log('failed fsAsync', err);
+      //   cb(err);
+      // });
 
-exports.addUrlToList = function(url, cb) {
+exports.readListOfUrls = Promise.promisify(function(cb) {
+  var context = this;
+  fsAsync.readFileAsync(context.paths.list)
+    .then(function(data) {
+      var fileString = '';
+      fileString += data;
+      var sitesArray = fileString.split('\n');
+      cb(null, sitesArray);
+    }).catch(function(err) {
+      console.log('failed readListOfUrls');
+      cb(null);
+    });
+});
+
+exports.isUrlInList = Promise.promisify(function(url, cb) {
+  this.readListOfUrls()
+    .then(function(array) {
+      // console.log('in then', array)
+      // console.log('in isUrlINlist array', array, 'url', url)
+      // cb(null, array.indexOf(url) !== -1, url);
+      if (array.indexOf(url) === -1) {
+        throw new Error();
+        // cb(new Error('site not in list'), false, null);
+      } else {
+        cb(null, true, url);
+      }
+    }).catch(function(err) {
+      console.log('failed isUrlInList', err);
+      cb(err);
+    });
+});
+
+exports.addUrlToList = Promise.promisify(function(url, cb) {
   //      1) should add a url to the list
-  fs.appendFile(this.paths.list, url + '\n', function(err) {
-    cb();
-  });
-};
+  fsAsync.appendFileAsync(this.paths.list, url + '\n')
+    .then(function() {
+      cb(null);
+    })
+    .catch(function(err) {
+      console.log('failed addUrlToList');
+      cb(new Error(err));
+    });
+});
 
 exports.isUrlArchived = function(url, cb) {
   fs.readFile(this.paths.archivedSites + '/' + url, function(err, data) {
